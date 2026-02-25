@@ -1,0 +1,24 @@
+# =============================================================================
+#  KR6 Pick & Place — Python 相依套件
+# =============================================================================
+
+# ── 共用：核心功能 ──
+opencv-python>=4.8
+ultralytics>=8.1        # YOLO-OBB
+torch>=2.1
+torchvision>=0.16
+opcua>=0.98             # OPC-UA client (python-opcua)
+numpy>=1.24
+psutil>=5.9             # CPU affinity / 系統監控
+
+# ── 共用：維護基礎設施 ──
+pyyaml>=6.0             # YAML 設定檔載入
+pytest>=7.0             # 單元 / 整合測試
+pytest-cov>=4.0         # 測試覆蓋率
+
+# ── 選項 A：Intel RealSense D435 ──
+pyrealsense2>=2.50      # D435 USB RGB + Depth
+
+# ── 選項 B：Cognex IS8505MP（GigE Vision）──
+harvesters>=1.4         # GigE Vision GenTL consumer
+# 需另安裝 Cognex GigE Vision Driver（提供 .cti GenTL producer）

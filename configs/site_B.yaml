@@ -1,0 +1,27 @@
+# =============================================================================
+#  Site B 覆蓋設定 — Cognex + 2D 模式
+# =============================================================================
+
+camera_type: "cognex"
+depth_mode: "2D"
+
+plc:
+  ip: "192.168.0.10"
+
+cognex:
+  ip: "192.168.0.50"
+  port: 3000
+  cti_path: "C:\\Program Files\\Cognex\\GigE Vision\\bin\\CognexGigEVision.cti"
+
+mechanical:
+  suction_length_mm: 80.0
+  safety_margin_mm: 5.0
+  offset_x: 0.0        # ← 手眼標定後填入實際值
+  offset_y: 0.0        # ← 手眼標定後填入實際值
+
+depth_2d:
+  worktable_z_mm: 0.0  # ← 實際量測後填入
+  thickness_map:
+    classA: 5.0
+    classB: 10.0
+    classC: 20.0

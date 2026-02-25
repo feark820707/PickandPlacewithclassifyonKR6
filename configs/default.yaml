@@ -1,0 +1,97 @@
+# =============================================================================
+#  KR6 Pick & Place Vision System — 預設設定檔
+#  所有參數的預設值集中在此，現場部署時由 site_X.yaml / local.yaml 覆蓋
+# =============================================================================
+
+# ---- 核心雙開關 ----
+camera_type: "d435"      # "d435" | "cognex"
+depth_mode: "3D"         # "3D"  | "2D"
+
+# ---- PLC / OPC-UA ----
+plc:
+  ip: "192.168.0.10"
+  opc_port: 4840
+  opc_namespace: "urn:siemens:s71500"
+  cmd_timeout_sec: 10.0   # cmd=2 等待逾時
+
+# ---- D435 參數（CAMERA_TYPE="d435" 時使用）----
+d435:
+  width: 1280
+  height: 720
+  fps: 30
+
+# ---- Cognex 參數（CAMERA_TYPE="cognex" 時使用）----
+cognex:
+  ip: "192.168.0.50"
+  port: 3000
+  cti_path: "C:\\Program Files\\Cognex\\GigE Vision\\bin\\CognexGigEVision.cti"
+
+# ---- 機械參數 ----
+mechanical:
+  suction_length_mm: 80.0   # 吸盤長度
+  safety_margin_mm: 5.0     # 安全餘量
+  offset_x: 0.0             # 鏡頭→吸盤 X 偏移 (mm)
+  offset_y: 0.0             # 鏡頭→吸盤 Y 偏移 (mm)
+
+# ---- 3D 模式參數（DEPTH_MODE="3D" 時使用）----
+depth_3d:
+  camera_height_mm: 800.0   # 相機到工作台距離
+
+# ---- 2D 模式參數（DEPTH_MODE="2D" 時使用）----
+depth_2d:
+  worktable_z_mm: 0.0       # 工作台面 Z 值（機器人座標系）
+  thickness_map:             # 各品類物件厚度 (mm)
+    classA: 5.0
+    classB: 10.0
+    classC: 20.0
+
+# ---- YOLO-OBB ----
+yolo:
+  model: "assets/best_obb.pt"
+  confidence: 0.5
+  device: "cuda:0"           # GPU 裝置
+
+# ---- 放置位置對應 (mm) ----
+place_map:
+  classA:
+    x: 400.0
+    y: 100.0
+    z: -50.0
+  classB:
+    x: 400.0
+    y: 200.0
+    z: -50.0
+  classC:
+    x: 400.0
+    y: 300.0
+    z: -50.0
+
+# ---- CPU 核心分配（i7-13620H：6P+4E = 16 Thread）----
+cpu_affinity:
+  geometry_pool: [6, 7, 8, 9]   # P-core × 4
+  coordinator: [12]              # E-core
+  opcua: [13]                    # E-core
+  ui: [14]                       # E-core
+
+# ---- 日誌 ----
+logging:
+  level: "INFO"
+  dir: "logs"
+  retention_days: 30
+  format: "json"                 # "json" | "text"
+
+# ---- 健康監控 ----
+health:
+  heartbeat_timeout_sec: 5.0
+  queue_max_size: 10
+  fps_warn_threshold: 15         # FPS 低於此值 → WARN
+
+# ---- 重試策略 ----
+retry:
+  max_retries: 3
+  delay_sec: 2.0
+  backoff_factor: 1.5            # 指數退避倍數
+
+# ---- 校準檔案路徑 ----
+calibration:
+  homography_path: "assets/H.npy"

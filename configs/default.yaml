@@ -9,7 +9,7 @@ depth_mode: "3D"         # "3D"  | "2D"
 
 # ---- PLC / OPC-UA ----
 plc:
-  ip: "192.168.0.10"
+  ip: "192.168.0.1"      # S7-1515 PLC（請依實際部署修改）
   opc_port: 4840
   opc_namespace: "urn:siemens:s71500"
   cmd_timeout_sec: 10.0   # cmd=2 等待逾時
@@ -22,7 +22,7 @@ d435:
 
 # ---- Cognex 參數（CAMERA_TYPE="cognex" 時使用）----
 cognex:
-  ip: "192.168.0.50"
+  ip: "192.168.0.10"     # Cognex IS8505P（實機偵測確認）
   port: 3000
   cti_path: "C:\\Program Files\\Cognex\\GigE Vision\\bin\\CognexGigEVision.cti"
 

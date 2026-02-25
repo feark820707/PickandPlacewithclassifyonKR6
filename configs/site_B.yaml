@@ -6,10 +6,10 @@ camera_type: "cognex"
 depth_mode: "2D"
 
 plc:
-  ip: "192.168.0.10"
+  ip: "192.168.0.1"        # S7-1515 PLC（請依實際部署修改）
 
 cognex:
-  ip: "192.168.0.50"
+  ip: "192.168.0.10"     # Cognex IS8505P（實機偵測確認）
   port: 3000
   cti_path: "C:\\Program Files\\Cognex\\GigE Vision\\bin\\CognexGigEVision.cti"
 

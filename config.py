@@ -239,17 +239,35 @@ class AppConfig:
     def d435_fps(self) -> int:
         return self._cfg.get("d435", {}).get("fps", 30)
 
-    # ---- Cognex ----
+    # ---- Cognex (In-Sight Native Mode) ----
     @property
     def cognex_ip(self) -> str:
         return self._cfg.get("cognex", {}).get("ip", "")
 
     @property
     def cognex_port(self) -> int:
-        return self._cfg.get("cognex", {}).get("port", 3000)
+        """Legacy 相容 — 回傳 telnet_port"""
+        return self.cognex_telnet_port
+
+    @property
+    def cognex_telnet_port(self) -> int:
+        return self._cfg.get("cognex", {}).get("telnet_port", 23)
+
+    @property
+    def cognex_ftp_port(self) -> int:
+        return self._cfg.get("cognex", {}).get("ftp_port", 21)
+
+    @property
+    def cognex_ftp_user(self) -> str:
+        return self._cfg.get("cognex", {}).get("ftp_user", "admin")
+
+    @property
+    def cognex_ftp_password(self) -> str:
+        return self._cfg.get("cognex", {}).get("ftp_password", "")
 
     @property
     def cognex_cti(self) -> str:
+        """Legacy 相容 — 已不再使用（IS8505P 用 Native Mode）"""
         return self._cfg.get("cognex", {}).get("cti_path", "")
 
     # ---- 機械參數 ----

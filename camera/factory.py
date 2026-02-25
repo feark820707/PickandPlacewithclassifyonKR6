@@ -47,8 +47,10 @@ def create_camera(cfg: AppConfig) -> CameraBase:
 
         return CognexCamera(
             ip=cfg.cognex_ip,
-            port=cfg.cognex_port,
-            cti_path=cfg.cognex_cti,
+            telnet_port=cfg.cognex_telnet_port,
+            ftp_port=cfg.cognex_ftp_port,
+            ftp_user=cfg.cognex_ftp_user,
+            ftp_password=cfg.cognex_ftp_password,
             depth_mode=depth_mode,
         )
 

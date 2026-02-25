@@ -9,9 +9,11 @@ plc:
   ip: "192.168.0.1"        # S7-1515 PLC（請依實際部署修改）
 
 cognex:
-  ip: "192.168.0.10"     # Cognex IS8505P（實機偵測確認）
-  port: 3000
-  cti_path: "C:\\Program Files\\Cognex\\GigE Vision\\bin\\CognexGigEVision.cti"
+  ip: "192.168.0.10"       # Cognex IS8505P（實機偵測確認）
+  telnet_port: 23            # Native Mode 命令控制
+  ftp_port: 21               # 影像下載
+  ftp_user: "admin"
+  ftp_password: ""
 
 mechanical:
   suction_length_mm: 80.0

@@ -4,7 +4,10 @@
 # =============================================================================
 
 # ---- 核心雙開關 ----
-camera_type: "d435"      # "d435" | "cognex"
+# camera_type: 已註冊的相機類型名稱（可擴充）
+#   內建: "d435" (Intel RealSense D435), "cognex" (Cognex IS8505P)
+#   擴充: 在 camera/ 下新增驅動並使用 @register_camera(...) 裝飾器
+camera_type: "d435"
 depth_mode: "3D"         # "3D"  | "2D"
 
 # ---- PLC / OPC-UA ----

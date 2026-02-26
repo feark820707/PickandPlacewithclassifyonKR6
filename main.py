@@ -222,11 +222,17 @@ def dry_run_check(app_cfg: AppConfig) -> int:
         "yaml": "pyyaml",
     }
 
-    # 根據配置加入選用相依
-    if app_cfg.camera_type == "d435":
-        required_imports["pyrealsense2"] = "pyrealsense2"
-    elif app_cfg.camera_type == "cognex":
-        required_imports["harvesters"] = "harvesters"
+    # 根據配置加入選用相依（從 registry 取得）
+    try:
+        from camera.base import CAMERA_REGISTRY
+        cam_info = CAMERA_REGISTRY.get(app_cfg.camera_type)
+        if cam_info and cam_info.dependencies:
+            for dep in cam_info.dependencies:
+                required_imports[dep] = dep
+    except ImportError:
+        # 回退：registry 不可用時的硬編碼
+        if app_cfg.camera_type == "d435":
+            required_imports["pyrealsense2"] = "pyrealsense2"
 
     for module, package in required_imports.items():
         try:

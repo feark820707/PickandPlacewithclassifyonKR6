@@ -181,7 +181,7 @@ class TestValidateConfig:
     def test_cognex_3d_raises(self, valid_cognex_2d_cfg):
         """Cognex + 3D → 不允許"""
         valid_cognex_2d_cfg["depth_mode"] = "3D"
-        with pytest.raises(ConfigError, match="Cognex"):
+        with pytest.raises(ConfigError, match="cognex.*3D|Cognex"):
             validate_config(valid_cognex_2d_cfg)
 
     def test_invalid_camera_type(self, valid_d435_3d_cfg):

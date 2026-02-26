@@ -97,8 +97,32 @@ def _load_yaml(path: Path) -> dict:
 # ---------------------------------------------------------------------------
 #  Config Validation
 # ---------------------------------------------------------------------------
-VALID_CAMERA_TYPES = {"d435", "cognex"}
 VALID_DEPTH_MODES = {"3D", "2D"}
+
+
+def _get_valid_camera_types() -> set[str]:
+    """
+    從 CAMERA_REGISTRY 動態取得合法 camera_type 集合。
+    若 registry 尚未載入（例如單元測試直接呼叫 validate_config），
+    則回退到內建預設值。
+    """
+    try:
+        from camera.base import CAMERA_REGISTRY
+        if CAMERA_REGISTRY:
+            return set(CAMERA_REGISTRY.keys())
+    except ImportError:
+        pass
+    # 回退預設值（保證核心測試可獨立運行）
+    return {"d435", "cognex"}
+
+
+def _get_camera_info(camera_type: str):
+    """取得指定相機的 CameraInfo，若無法取得則回傳 None"""
+    try:
+        from camera.base import CAMERA_REGISTRY
+        return CAMERA_REGISTRY.get(camera_type)
+    except ImportError:
+        return None
 
 
 def validate_config(cfg: dict) -> None:
@@ -106,21 +130,22 @@ def validate_config(cfg: dict) -> None:
     驗證設定檔合法性，不合法則拋出 ConfigError。
 
     檢查項目：
-      1. camera_type 合法值
+      1. camera_type 合法值（依 CAMERA_REGISTRY 動態判斷）
       2. depth_mode 合法值
-      3. Cognex + 3D 不允許
+      3. camera_type + depth_mode 相容性（依 registry metadata）
       4. 2D 模式下 thickness_map 必須涵蓋 place_map 所有類別
-      5. 必要參數存在
+      5. 必要參數存在（通用 + 相機專屬，由 registry 提供）
       6. 偏移量零值警告
     """
     camera_type = cfg.get("camera_type", "")
     depth_mode = cfg.get("depth_mode", "")
 
-    # 1. camera_type
-    if camera_type not in VALID_CAMERA_TYPES:
+    # 1. camera_type（動態查詢 registry）
+    valid_camera_types = _get_valid_camera_types()
+    if camera_type not in valid_camera_types:
         raise ConfigError(
             f"camera_type='{camera_type}' 不合法，"
-            f"允許值: {VALID_CAMERA_TYPES}"
+            f"允許值: {valid_camera_types}"
         )
 
     # 2. depth_mode
@@ -130,12 +155,21 @@ def validate_config(cfg: dict) -> None:
             f"允許值: {VALID_DEPTH_MODES}"
         )
 
-    # 3. Cognex + 3D → 不允許
-    if camera_type == "cognex" and depth_mode == "3D":
-        raise ConfigError(
-            "Cognex 無深度硬體，不支援 DEPTH_MODE='3D'。"
-            "請改為 DEPTH_MODE='2D' 或切換 CAMERA_TYPE='d435'。"
-        )
+    # 3. camera_type + depth_mode 相容性（由 registry metadata 驅動）
+    cam_info = _get_camera_info(camera_type)
+    if cam_info is not None:
+        if depth_mode not in cam_info.supported_depth_modes:
+            raise ConfigError(
+                f"{camera_type} 不支援 DEPTH_MODE='{depth_mode}'。"
+                f"支援的模式: {set(cam_info.supported_depth_modes)}。"
+            )
+    else:
+        # 回退硬編碼（registry 不可用時保持向下相容）
+        if camera_type == "cognex" and depth_mode == "3D":
+            raise ConfigError(
+                "Cognex 無深度硬體，不支援 DEPTH_MODE='3D'。"
+                "請改為 DEPTH_MODE='2D' 或切換 CAMERA_TYPE='d435'。"
+            )
 
     # 4. 2D 模式 → thickness_map 必須涵蓋 place_map
     if depth_mode == "2D":
@@ -152,11 +186,18 @@ def validate_config(cfg: dict) -> None:
     _require_key(cfg, "mechanical.suction_length_mm", "吸盤長度")
     _require_key(cfg, "yolo.model", "YOLO 模型路徑")
 
-    if camera_type == "d435":
-        _require_key(cfg, "d435.width", "D435 影像寬度")
-        _require_key(cfg, "d435.height", "D435 影像高度")
-    elif camera_type == "cognex":
-        _require_key(cfg, "cognex.ip", "Cognex 相機 IP")
+    # 相機專屬必要參數（由 registry metadata 驅動）
+    if cam_info is not None and cam_info.required_config_keys:
+        for dotted_key in cam_info.required_config_keys:
+            desc = f"{camera_type} 必要參數"
+            _require_key(cfg, dotted_key, desc)
+    else:
+        # 回退硬編碼
+        if camera_type == "d435":
+            _require_key(cfg, "d435.width", "D435 影像寬度")
+            _require_key(cfg, "d435.height", "D435 影像高度")
+        elif camera_type == "cognex":
+            _require_key(cfg, "cognex.ip", "Cognex 相機 IP")
 
     if depth_mode == "3D":
         _require_key(cfg, "depth_3d.camera_height_mm", "相機安裝高度")
@@ -269,6 +310,20 @@ class AppConfig:
     def cognex_cti(self) -> str:
         """Legacy 相容 — 已不再使用（IS8505P 用 Native Mode）"""
         return self._cfg.get("cognex", {}).get("cti_path", "")
+
+    # ---- 通用相機參數存取 ----
+    @property
+    def camera_config(self) -> dict:
+        """
+        通用相機參數存取 — 回傳 YAML 中 camera_type 對應 section 的 dict。
+
+        例如 camera_type="d435" → 回傳 cfg["d435"]
+             camera_type="cognex" → 回傳 cfg["cognex"]
+             camera_type="my_cam" → 回傳 cfg["my_cam"]
+
+        若該 section 不存在則回傳空 dict。
+        """
+        return dict(self._cfg.get(self.camera_type, {}))
 
     # ---- 機械參數 ----
     @property

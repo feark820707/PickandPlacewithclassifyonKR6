@@ -22,18 +22,43 @@ import logging
 import socket
 import time
 from ftplib import FTP
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import cv2
 import numpy as np
 
-from camera.base import CameraBase
+from camera.base import CameraBase, register_camera
+
+if TYPE_CHECKING:
+    from config import AppConfig
 
 logger = logging.getLogger(__name__)
 
 # In-Sight Native Mode 回覆前綴
 _ACK = "1"   # 指令成功
 _NAK = "0"   # 指令失敗
+
+
+def _cognex_kwargs(cfg: "AppConfig") -> dict:
+    """從 AppConfig 建構 CognexCamera 初始化參數"""
+    sec = cfg.raw.get("cognex", {})
+    return {
+        "ip": sec.get("ip", "192.168.0.10"),
+        "telnet_port": sec.get("telnet_port", 23),
+        "ftp_port": sec.get("ftp_port", 21),
+        "ftp_user": sec.get("ftp_user", "admin"),
+        "ftp_password": sec.get("ftp_password", ""),
+    }
+
+
+@register_camera(
+    "cognex",
+    supported_depth_modes={"2D"},
+    required_config_keys=("cognex.ip",),
+    dependencies=(),
+    description="Cognex IS8505MP In-Sight Native Mode (Ethernet, RGB only)",
+    factory_kwargs_builder=_cognex_kwargs,
+)
 
 
 class CognexCamera(CameraBase):
@@ -63,8 +88,8 @@ class CognexCamera(CameraBase):
     # 預設 Native Mode 通訊參數
     _RECV_BUF = 4096
     _CMD_TIMEOUT = 5.0       # 指令回覆等待秒數
-    _TRIGGER_SETTLE = 0.3    # 觸發後等待影像穩定 (sec)
-    _FTP_IMAGE_PATH = "image.bmp"      # IS8505P 實機確認的影像檔名
+    _TRIGGER_SETTLE = 0.05   # 觸發後等待影像穩定 (sec)
+    _FTP_IMAGE_PATH = "image.jpg"      # IS8505P JPG (373KB vs BMP 4.78MB)
 
     def __init__(
         self,

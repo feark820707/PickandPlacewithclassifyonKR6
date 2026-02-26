@@ -5,13 +5,36 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 
-from camera.base import CameraBase
+from camera.base import CameraBase, register_camera
+
+if TYPE_CHECKING:
+    from config import AppConfig
 
 logger = logging.getLogger(__name__)
+
+
+def _d435_kwargs(cfg: "AppConfig") -> dict:
+    """從 AppConfig 建構 D435Camera 初始化參數"""
+    sec = cfg.raw.get("d435", {})
+    return {
+        "width": sec.get("width", 1280),
+        "height": sec.get("height", 720),
+        "fps": sec.get("fps", 30),
+    }
+
+
+@register_camera(
+    "d435",
+    supported_depth_modes={"2D", "3D"},
+    required_config_keys=("d435.width", "d435.height"),
+    dependencies=("pyrealsense2",),
+    description="Intel RealSense D435 (USB 3.0, RGB + Depth)",
+    factory_kwargs_builder=_d435_kwargs,
+)
 
 
 class D435Camera(CameraBase):

@@ -219,7 +219,8 @@ class Coordinator:
                 rgb, depth = self._camera.get_frame()
                 self._cycle_id += 1
 
-                self.health.beat("camera", fps=self._cfg.d435_fps)
+                self.health.beat("camera", fps=self._cfg.raw.get(
+                    self._cfg.camera_type, {}).get("fps", 30))
 
                 try:
                     self._frame_queue.put(

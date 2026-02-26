@@ -41,3 +41,10 @@ Thumbs.db
 # Coverage
 htmlcov/
 .coverage
+
+# Demo / inference outputs
+runs/
+
+# Downloaded pretrained weights (root level)
+yolo11m-obb.pt
+*.pt

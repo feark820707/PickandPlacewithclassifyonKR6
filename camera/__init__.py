@@ -8,5 +8,7 @@ from camera.base import (  # noqa: F401
 )
 
 # 載入內建驅動（觸發裝飾器註冊）
-import camera.d435_stream   # noqa: F401
+import camera.d435_stream    # noqa: F401
 import camera.cognex_stream  # noqa: F401
+import camera.file_source    # noqa: F401
+import camera.usb_cam        # noqa: F401

@@ -1,0 +1,24 @@
+# =============================================================================
+#  KR6 Pick & Place — YOLO-OBB 訓練資料集設定
+#  ultralytics >= 8.1  （yolo obb train data=datasets/dataset.yaml ...）
+#
+#  使用流程：
+#    1. python tools/collect_images.py          → 收集原始影像到 datasets/raw/
+#    2. 用標注工具標注 OBB（建議 Label Studio 或 Roboflow）
+#    3. python tools/split_dataset.py           → 自動分割 train/val
+#    4. yolo obb train data=datasets/dataset.yaml model=yolov8m-obb.pt epochs=100
+# =============================================================================
+
+# 資料集根目錄（相對於此 yaml 所在位置，或使用絕對路徑）
+path: .
+
+train: train/images
+val:   val/images
+
+# 品類數量與名稱（順序即 class_id，0=classA, 1=classB, ...）
+nc: 4
+names:
+  - classA   # id=0  ← 依實際物件替換名稱
+  - classB   # id=1
+  - classC   # id=2
+  - classD   # id=3

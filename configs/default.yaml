@@ -47,14 +47,16 @@ depth_3d:
 # ---- 2D 模式參數（DEPTH_MODE="2D" 時使用）----
 depth_2d:
   worktable_z_mm: 0.0       # 工作台面 Z 值（機器人座標系）
-  thickness_map:             # 各品類物件厚度 (mm)
-    classA: 5.0
-    classB: 10.0
-    classC: 20.0
+  thickness_map:             # 各品類物件厚度 (mm)，依實際量測填入
+    classA: 5.0              # 待確認
+    classB: 10.0             # 待確認
+    classC: 20.0             # 待確認
+    classD: 15.0             # 待確認
 
 # ---- YOLO-OBB ----
 yolo:
   model: "assets/best_obb.pt"
+  pretrain: "yolo11m-obb.pt" # fine-tune 起點（DOTA 預訓練，ultralytics 自動下載）
   confidence: 0.5
   device: "cuda:0"           # GPU 裝置
 
@@ -72,6 +74,10 @@ place_map:
     x: 400.0
     y: 300.0
     z: -50.0
+  classD:
+    x: 400.0
+    y: 400.0
+    z: -50.0              # 待確認
 
 # ---- CPU 核心分配（i7-13620H：6P+4E = 16 Thread）----
 cpu_affinity:
@@ -101,4 +107,19 @@ retry:
 
 # ---- 校準檔案路徑 ----
 calibration:
-  homography_path: "assets/H.npy"
+  homography_path:   "assets/H.npy"
+  camera_K_path:     "assets/camera_K.npy"   # 棋盤格內參校正（calibrate_camera.py）
+  camera_D_path:     "assets/camera_D.npy"
+  cam2tool_path:     "assets/T_cam2tool.npy"  # 手眼 6DOF（calibrate_hand_eye.py）
+
+# ---- 影像前處理管線 ----
+# 訓練資料收集與推論必須使用相同配置
+preprocess:
+  enabled:       false        # true = 啟用管線
+  undistort:     false        # 需要 camera_K.npy + camera_D.npy
+  crop:          null         # ROI [x1, y1, x2, y2]，null = 不裁切
+  clahe:         false        # 局部自適應對比增強（光線不均勻時啟用）
+  clahe_clip:    2.0          # CLAHE clipLimit
+  clahe_tile:    8            # CLAHE tileGridSize
+  gamma:         1.0          # 1.0 = 不調整；< 1.0 提亮；> 1.0 壓暗
+  denoise_ksize: 0            # 高斯去噪 kernel（0 = 不去噪；需奇數如 3/5）

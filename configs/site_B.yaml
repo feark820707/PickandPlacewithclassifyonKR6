@@ -23,7 +23,8 @@ mechanical:
 
 depth_2d:
   worktable_z_mm: 0.0  # ← 實際量測後填入
-  thickness_map:
+  thickness_map:        # ← 各品類厚度，實際量測後填入 (mm)
     classA: 5.0
     classB: 10.0
     classC: 20.0
+    classD: 15.0
